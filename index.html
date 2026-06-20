@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<!-- saved from url=(0261)file:///Users/useog/Downloads/%E1%84%83%E1%85%A2%E1%84%8D%E1%85%A9%E1%86%A8%E1%84%8C%E1%85%B5%E1%86%AB%E1%84%83%E1%85%A1%E1%86%AB_%E1%84%8B%E1%85%B2%E1%86%AB%E1%84%80%E1%85%AA%E1%86%A8%E1%84%89%E1%85%A5%E1%86%AB%E1%84%87%E1%85%A5%E1%84%8C%E1%85%A5%E1%86%AB.html -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대쪽진단 — 주거 침기 진단</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  /* ---- Notion 마케팅 사이트 디자인 토큰 ---- */
+  --bg:#F6F5F4;            /* canvas-soft, 종이색 캔버스 */
+  --surface:#FFFFFF;        /* 카드/패널 표면 */
+  --surface2:#F6F5F4;       /* 카드 내부의 살짝 들어간 well */
+  --line:#E6E6E6;           /* hairline */
+  --txt:#1A1A19;            /* ink */
+  --muted:#31302E;          /* ink-secondary */
+  --faint:#615D59;          /* stone / ink-muted */
+  --faint2:#A39E98;         /* ash / 캡션용 */
+
+  --action:#0075DE;         /* Notion Blue — 유일한 구조색 (CTA/링크/active) */
+  --action-active:#005BAB;  /* pressed */
+  --indigo:#213183;         /* 다크 히어로 night band */
+
+  --ok:#1AAE39;             /* sticker green — 확정/양호 */
+  --weak:#DD5B00;           /* sticker orange — 약 의심 / 주의 */
+  --strong:#793400;         /* sticker orange-deep — 강 의심 / 취약 */
+  --cold:#1C6FB0;          /* sticker sky의 텍스트용 진한 변형 — 라이트 표면 가독성 확보 */
+  --hot:#DD5B00;            /* sticker orange — 열도 강조 */
+  --ink:#FFFFFF;            /* accent 색 위에 올라가는 텍스트색 */
+
+  --r-xs:4px; --r-sm:5px; --r-md:8px; --r-lg:12px; --r-xl:16px; --r-full:9999px;
+  --sh-1:0 0.2px 1px rgba(0,0,0,.02),0 0.8px 3px rgba(0,0,0,.03),0 2px 8px rgba(0,0,0,.035),0 4px 18px rgba(0,0,0,.05);
+  --sh-2:0 1px 2px rgba(0,0,0,.03),0 4px 10px rgba(0,0,0,.05),0 16px 32px rgba(0,0,0,.07),0 23px 52px rgba(0,0,0,.06);
+
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:"Inter",-apple-system,system-ui,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15px;line-height:1.5}
+button{font-family:inherit;cursor:pointer}
+h1,h2,h3{font-weight:700;letter-spacing:-.01em;color:var(--txt)}
+h1{font-size:32px;letter-spacing:-.02em;line-height:1.18}
+h2{font-size:22px;letter-spacing:-.012em;line-height:1.25}
+h3{font-size:16px;letter-spacing:-.005em}
+
+/* 헤더 — Notion nav-bar: 흰 표면, 헤어라인 */
+header{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--line);background:var(--surface)}
+.logo-bar{width:44px;height:11px;border-radius:3px;background:linear-gradient(90deg,#08204A,#1E63B0,#2BB7D6,#4CAF50,#F2C53D,#EF5B3B,#FBE8D0)}
+.logo-txt{font-weight:700;font-size:16px;letter-spacing:-.01em;color:var(--txt)}
+.logo-sub{color:var(--faint);font-size:12px;font-weight:400}
+
+/* 스텝바 */
+.steps{display:flex;gap:6px;padding:11px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--surface)}
+.step{display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:var(--r-full);font-size:12.5px;color:var(--faint);border:1px solid transparent;cursor:pointer}
+.step .n{width:18px;height:18px;border-radius:var(--r-full);border:1px solid var(--faint2);display:grid;place-items:center;font-size:11px;font-family:var(--mono);color:var(--faint)}
+.step.active{color:var(--action);background:rgba(0,117,222,.07);border-color:rgba(0,117,222,.18)}
+.step.active .n{border-color:var(--action);color:var(--action)}
+.step.done .n{background:var(--ok);border-color:var(--ok);color:#fff}
+
+main{max-width:1100px;margin:0 auto;padding:26px 22px 80px}
+.screen{display:none;opacity:0;transform:translateY(10px);transition:opacity .19s ease,transform .19s ease}
+.screen.on{display:block}
+.screen.on.show{opacity:1;transform:translateY(0)}
+.eyebrow{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--action);margin-bottom:6px}
+.lead{color:var(--muted);margin:6px 0 22px;max-width:60ch;font-size:14.5px}
+
+/* 히어로 — 사이트 진입 시 첫 화면. Notion의 단 하나뿐인 다크 "night band" */
+#main{position:relative;overflow:hidden;background:var(--indigo);margin:-26px -22px 0;padding:0 22px}
+.cover{position:relative;z-index:1;padding:64px 0 56px;max-width:640px}
+.cover-title{font-size:42px}
+.main-glow{position:absolute;inset:0;pointer-events:none;z-index:0}
+.main-glow::before,.main-glow::after{content:"";position:absolute;border-radius:50%;filter:blur(70px);opacity:.38}
+.main-glow::before{width:420px;height:420px;top:-160px;right:-100px;background:#FF64C8}
+.main-glow::after{width:340px;height:340px;top:160px;right:320px;background:#2A9D99}
+.cover-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.cover-tags span{font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.01em;color:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.22);border-radius:var(--r-full);padding:5px 12px;background:rgba(255,255,255,.06)}
+.cover-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.reveal-group > *{opacity:0;transform:translateY(12px);animation:revealUp .55s cubic-bezier(.22,.61,.36,1) forwards}
+.reveal-group > *:nth-child(1){animation-delay:.02s}
+.reveal-group > *:nth-child(2){animation-delay:.10s}
+.reveal-group > *:nth-child(3){animation-delay:.18s}
+.reveal-group > *:nth-child(4){animation-delay:.26s}
+.reveal-group > *:nth-child(5){animation-delay:.34s}
+.reveal-group > *:nth-child(6){animation-delay:.42s}
+@keyframes revealUp{to{opacity:1;transform:translateY(0)}}
+.hero-eyebrow{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#9DB8FF;margin-bottom:16px}
+.hero-title{font-size:30px;line-height:1.22;font-weight:700;letter-spacing:-.02em;margin-bottom:16px;color:#fff}
+.hero-desc{color:rgba(255,255,255,.72);font-size:15px;line-height:1.7;max-width:56ch;margin-bottom:8px}
+.hero-strip{height:5px;border-radius:3px;max-width:420px;margin-bottom:22px;background:linear-gradient(90deg,#08204A,#1E63B0,#2BB7D6,#4CAF50,#F2C53D,#EF5B3B,#FBE8D0)}
+.about-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:30px 0 30px}
+.about-step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh-1)}
+.about-step .an-tile{width:34px;height:34px;border-radius:var(--r-md);display:grid;place-items:center;font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;margin-bottom:14px}
+.about-step b{display:block;font-size:15px;margin-bottom:6px;letter-spacing:-.005em}
+.about-step span{color:var(--faint);font-size:13.5px;line-height:1.6}
+@media(max-width:860px){
+  .hero-title{font-size:23px}
+  .cover-title{font-size:28px!important}
+  .about-steps{grid-template-columns:1fr;gap:14px}
+  #main{margin:-18px -14px 0;padding:0 14px}
+}
+
+/* 버튼 — primary는 완전 필(pill), 유틸리티는 8px */
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--txt);padding:9px 18px;border-radius:var(--r-md);font-size:14px;font-weight:600;transition:.15s}
+.btn:hover:not(:disabled){border-color:var(--faint2);background:var(--surface2)}
+.btn.primary{background:var(--action);border-color:var(--action);color:var(--ink);border-radius:var(--r-full);padding:11px 22px;box-shadow:var(--sh-1)}
+.btn.primary:hover:not(:disabled){background:var(--action-active);border-color:var(--action-active);transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,117,222,.22)}
+.btn.secondary{background:var(--surface);border:1px solid var(--line);color:var(--txt);border-radius:var(--r-full);padding:11px 22px;box-shadow:var(--sh-1)}
+.btn.on-dark{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28);color:#fff}
+.btn.on-dark:hover:not(:disabled){background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.4)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;border-color:transparent}
+
+/* 업로드 */
+.drops{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.drop-zone{border:1.5px dashed var(--faint2);border-radius:var(--r-lg);background:var(--surface);min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px;text-align:center;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--action);background:rgba(0,117,222,.04)}
+.drop-zone.filled{padding:0;border-style:solid;border-color:var(--action);box-shadow:var(--sh-1)}
+.drop-zone.filled img,.drop-zone.filled canvas{width:100%;height:220px;object-fit:cover;display:block}
+.drop-ico{font-size:28px}
+.drop-ttl{font-weight:600;font-size:14px;color:var(--txt)}
+.drop-sub{color:var(--faint);font-size:12px}
+.drop-note{color:var(--faint2);font-size:10.5px;margin-top:6px;max-width:200px;line-height:1.4}
+.drop-badge{position:absolute;top:8px;left:8px;font-family:var(--mono);font-size:11px;color:#fff;background:rgba(10,14,18,.78);padding:3px 8px;border-radius:var(--r-sm);pointer-events:none}
+.drop-reset{position:absolute;top:8px;right:8px;background:rgba(10,14,18,.78);border:none;color:#fff;font-size:14px;border-radius:var(--r-sm);padding:2px 7px;cursor:pointer}
+.drop-reset:hover{color:#ffb4a0}
+
+.notice{display:flex;align-items:center;gap:10px;background:rgba(26,174,57,.07);border:1px solid rgba(26,174,57,.22);border-radius:var(--r-lg);padding:11px 14px;margin-bottom:18px;font-size:13.5px;color:var(--txt)}
+.notice.warn{background:rgba(221,91,0,.07);border-color:rgba(221,91,0,.22)}
+.dot{width:9px;height:9px;border-radius:var(--r-full);background:var(--ok);flex-shrink:0}
+.dot.warn{background:var(--weak)}
+
+.meta-form{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+.card-form{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;box-shadow:var(--sh-1)}
+.field{margin-bottom:13px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:12px;color:var(--faint);margin-bottom:5px;font-weight:500}
+.field input,.field select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xs);color:var(--txt);padding:8px 11px;font-family:inherit;font-size:13.5px}
+.field input:focus,.field select:focus{outline:none;border-color:var(--action);box-shadow:0 0 0 3px rgba(0,117,222,.12)}
+.hint-box{display:flex;flex-direction:column;justify-content:center;gap:10px;color:var(--faint);font-size:13px}
+.ftbar{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+
+/* 분석 화면 */
+.work{display:grid;grid-template-columns:1.35fr 1fr;gap:18px}
+.viewer{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-1)}
+.vtop{display:flex;gap:6px;padding:10px;border-bottom:1px solid var(--line);align-items:center;background:var(--surface)}
+.seg{display:flex;background:var(--surface2);border:1px solid var(--line);border-radius:var(--r-md);padding:3px}
+.seg button{border:0;background:transparent;color:var(--faint);padding:6px 13px;border-radius:6px;font-size:13px;font-weight:600}
+.seg button.on{background:var(--surface);color:var(--txt);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+/* — 분석 캔버스는 실제 열화상 카메라 화면처럼 다크 인스트루먼트 인셋으로 유지 — */
+.stage{position:relative;aspect-ratio:4/3;background:#0a0e12;overflow:hidden}
+.stage canvas,.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.markers-layer{position:absolute;inset:0;pointer-events:none}
+
+/* 계측기 HUD — 좌상단 상태 칩 */
+.hud-chip{position:absolute;top:10px;left:10px;z-index:5;display:flex;align-items:center;gap:6px;background:rgba(10,14,18,.74);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-md);padding:5px 9px;font-family:var(--mono);font-size:10.5px;color:#fff;letter-spacing:.03em;backdrop-filter:blur(3px)}
+.hud-chip b{color:#fff;font-weight:700}
+.hud-chip .sep{color:rgba(255,255,255,.3)}
+
+/* 계측기 HUD — 우측 세로 온도 스케일 */
+.hud-scale{position:absolute;top:10px;bottom:10px;right:10px;z-index:5;width:16px;border:1px solid rgba(255,255,255,.28);box-shadow:0 0 0 1px rgba(0,0,0,.5);border-radius:3px}
+.hud-scale .grad{position:absolute;inset:0;border-radius:3px;background:linear-gradient(180deg,#FBE8D0,#EF5B3B,#F2C53D,#4CAF50,#2BB7D6,#1E63B0,#08204A)}
+.hud-scale .tick{position:absolute;right:100%;margin-right:5px;font-family:var(--mono);font-size:9px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.85);white-space:nowrap}
+
+/* 마커 — 십자선 스팟 리티클 */
+.mk{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer}
+.mk .ring{--mkc:var(--mk-color,#FFB23D);width:18px;height:18px;border-radius:var(--r-full);border:1.5px solid var(--mkc);background:rgba(0,0,0,.2);position:relative;transition:.15s}
+.mk .ring::before{content:"";position:absolute;left:50%;top:50%;width:3px;height:3px;border-radius:var(--r-full);background:var(--mkc);transform:translate(-50%,-50%)}
+.mk .ring::after{content:"";position:absolute;left:50%;top:50%;width:220%;height:220%;border-radius:var(--r-full);border:1px solid var(--mkc);opacity:.3;transform:translate(-50%,-50%)}
+.mk .tag{position:absolute;left:100%;top:-3px;margin-left:5px;background:rgba(10,14,18,.82);border:1px solid rgba(255,255,255,.2);border-left:2px solid var(--mkc);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;padding:1px 6px 1px 5px;border-radius:var(--r-sm);white-space:nowrap}
+.mk.strong .ring{--mkc:var(--mk-color,#FF7A3D);animation:pulse 1.8s infinite}
+.mk.confirmed .ring{--mkc:#3DDC66;animation:none}
+.mk.dismissed .ring{--mkc:#8C8579;opacity:.5;animation:none}
+.mk.sel .ring{box-shadow:0 0 0 3px var(--action);transform:scale(1.2)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,122,61,.4)}50%{box-shadow:0 0 0 7px rgba(255,122,61,0)}}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh-1)}
+.panel h3{font-size:14px;margin-bottom:4px;color:var(--txt)}
+.panel .hint{color:var(--faint);font-size:12.5px;margin-bottom:14px}
+.slider-wrap label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--faint);margin-bottom:8px}
+.slider-wrap label b{font-family:var(--mono);color:var(--action);font-size:15px}
+input[type=range]{width:100%;accent-color:var(--action)}
+.readout{display:flex;gap:8px;margin:14px 0 10px}
+.readout div{flex:1;background:var(--surface2);border:1px solid var(--line);border-radius:var(--r-md);padding:9px 10px}
+.readout .k{font-size:11px;color:var(--faint)}
+.readout .v{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--txt)}
+.readout .v.ok{color:var(--ok)}
+
+.clist{display:flex;flex-direction:column;gap:7px;margin-top:4px}
+.cand{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;background:var(--surface2);cursor:pointer;transition:.12s}
+.cand:hover{border-color:var(--faint2)}
+.cand.sel{border-color:var(--action);box-shadow:0 0 0 3px rgba(0,117,222,.1)}
+.cand-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cand-nm{font-weight:600;font-size:13.5px;color:var(--txt)}
+.cand-dt{font-family:var(--mono);font-size:13px;color:var(--hot)}
+.cand-sub{color:var(--faint);font-size:12px;margin-top:3px}
+.pill{font-size:10.5px;padding:3px 8px;border-radius:var(--r-full);font-weight:700}
+.pill.s{background:rgba(121,52,0,.1);color:var(--strong)}
+.pill.w{background:rgba(221,91,0,.1);color:var(--weak)}
+.pill.ok{background:rgba(26,174,57,.12);color:var(--ok)}
+.pill.no{background:rgba(97,93,89,.1);color:var(--faint)}
+
+.detail-box{margin-top:12px;border-top:1px solid var(--line);padding-top:13px}
+.detail-rows{font-size:13px}
+.detail-rows div{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--line)}
+.detail-rows span:first-child{color:var(--faint)}
+.detail-rows span:last-child{font-family:var(--mono);color:var(--txt)}
+.verdict{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+.verdict button{padding:9px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);color:var(--txt);font-size:13px;font-weight:600;cursor:pointer;transition:.12s}
+.verdict button.yes{border-color:var(--ok);color:var(--ok)}
+.verdict button:hover{border-color:var(--faint2);background:var(--surface2)}
+
+/* 리포트 */
+.report-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--sh-2)}
+.rhead{padding:22px 26px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.grade-badge{font-family:var(--mono);font-size:34px;font-weight:700;padding:10px 18px;border-radius:var(--r-lg);line-height:1}
+.grade-A{background:rgba(26,174,57,.1);color:var(--ok)}
+.grade-B{background:rgba(221,91,0,.1);color:var(--weak)}
+.grade-C{background:rgba(121,52,0,.1);color:var(--strong)}
+.rbody{padding:22px 26px}
+.rphotos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.rphotos figure{margin:0;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:#0a0e12}
+.rphotos img{width:100%;height:150px;object-fit:cover;display:block;background:#0a0e12}
+.rphotos figcaption{font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:.02em;color:var(--faint);text-align:center;padding:7px 0;border-top:1px solid var(--line);background:var(--surface)}
+@media(max-width:860px){.rphotos{grid-template-columns:1fr}}
+.rstats{display:flex;gap:24px;margin-bottom:20px;flex-wrap:wrap}
+.rstats .v{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--txt)}
+.rstats .k{color:var(--faint);font-size:12px}
+.ftable{width:100%;border-collapse:collapse;margin-top:4px}
+#historyList .ftable{min-width:680px}
+#historyList .ftable th,#historyList .ftable td{white-space:nowrap}
+.ftable th{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);text-align:left;padding:0 10px 8px;border-bottom:1px solid var(--line)}
+.ftable th:last-child,.ftable td:last-child{text-align:right}
+.ftable td{padding:11px 10px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:top;color:var(--txt)}
+.ftable td.mono{font-family:var(--mono);color:var(--faint);font-size:12.5px}
+.ftable td.num{font-weight:700}
+.ftable .nm{font-weight:600}
+.ftable .sub{color:var(--faint);font-size:12px;margin-top:2px}
+.ftable tbody tr:last-child td{border-bottom:none}
+.rinsight{margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
+.rinsight-head{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.rinsight-summary{font-size:13.5px;line-height:1.7;color:var(--txt);margin-bottom:16px}
+.rinsight-list{display:flex;flex-direction:column;gap:14px;margin-bottom:12px}
+.rinsight-item{display:flex;gap:12px;align-items:flex-start}
+.rinsight-item .ri-no{font-family:var(--mono);font-size:11px;color:var(--action);font-weight:700;flex:0 0 26px;padding-top:2px}
+.rinsight-item b{display:block;font-size:13.5px;margin-bottom:3px;color:var(--txt)}
+.rinsight-item span{color:var(--faint);font-size:13px;line-height:1.6}
+.rinsight-note{color:var(--faint2);font-size:11px;line-height:1.5}
+.rfoot{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--faint);font-size:11.5px;font-family:var(--mono);flex-wrap:wrap}
+.rfoot .sig{color:var(--faint2)}
+.empty-msg{color:var(--faint);text-align:center;padding:28px;font-size:14px}
+
+/* 분석 진행 오버레이 (다크 인스트루먼트 영역 위라 다크 유지) */
+.analyzing-overlay{position:absolute;inset:0;background:rgba(10,14,18,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:10}
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--action);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:860px){
+  .work{grid-template-columns:1fr}
+  .drops,.meta-form{grid-template-columns:1fr}
+  main{padding:18px 14px 60px}
+}
+
+/* =============================================
+   인쇄용 스타일시트
+   — 헤더/스텝바/버튼 등 화면 전용 UI는 숨기고
+     리포트 카드만 종이에 맞게 깔끔히 출력
+   ============================================= */
+@media print{
+  @page{ margin:14mm; size:A4; }
+  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; color-adjust:exact; }
+  body{ background:#fff }
+  header, .steps, .ftbar, button,
+  .hud-chip, .hud-scale, .markers-layer, .analyzing-overlay,
+  .main-glow, .cover-actions{ display:none!important }
+  main{ max-width:none; margin:0; padding:0 }
+  .screen{ opacity:1!important; transform:none!important; transition:none!important }
+  .eyebrow{ display:none }
+  h1{ font-size:19px; margin-bottom:10px }
+  .report-card{ box-shadow:none; border:1px solid #ddd; border-radius:0 }
+  .rhead, .rbody{ padding:14px 4px }
+  .rphotos img{ height:120px }
+  .rhead, .rphotos, .rstats, .ftable, .rinsight, .rfoot{
+    break-inside:avoid; page-break-inside:avoid;
+  }
+  .ftable thead{ display:table-header-group }
+  .rphotos{ grid-template-columns:repeat(3,1fr)!important }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-bar"></div>
+  <span class="logo-txt">대쪽진단</span>
+  <span class="logo-sub">주거 침기 진단</span>
+  <button class="btn ghost" style="margin-left:auto;font-size:13px;padding:6px 12px" onclick="go('history')">🗂 히스토리</button>
+</header>
+
+<div class="steps" id="steps" style="display:none">
+  <div class="step active" data-s="upload"><span class="n">1</span> 사진 업로드</div>
+  <div class="step" data-s="analysis"><span class="n">2</span> 분석 · 확정</div>
+  <div class="step" data-s="report"><span class="n">3</span> 진단 리포트</div>
+</div>
+
+<main>
+
+  <!-- ⓪ 메인화면 -->
+  <section class="screen on show" id="main">
+    <div class="main-glow"></div>
+    <div class="cover reveal-group">
+      <div class="hero-eyebrow">대쪽진단 · 주거 침기 자동 진단</div>
+      <div class="hero-title cover-title">벽은 멀쩡해 보여도,<br>틈은 매일 열을 흘립니다.</div>
+      <p class="hero-desc">대구 쪽방촌 등 취약 주거공간의 열화상 사진으로, 눈에 보이지 않는 틈새 공기 유입(침기)을 자동으로 찾아내는 진단 도구입니다.</p>
+      <div class="cover-tags"><span>BFS 연결성분 분석</span><span>FLUKE 호환</span><span>현장 PDF 출력</span></div>
+      <div class="hero-strip"></div>
+      <div class="cover-actions">
+        <button class="btn primary" onclick="go('about')">프로그램 알아보기 →</button>
+        <button class="btn on-dark" onclick="go('upload')">사진 업로드로 바로가기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⓪ 프로그램 설명 -->
+  <section class="screen reveal-group" id="about">
+    <div class="eyebrow">대쪽진단이란</div>
+    <h1 style="margin-bottom:6px">주거 침기 진단 프로그램</h1>
+    <p class="lead">창틀과 벽 모서리의 미세한 틈으로 빠져나가는 공기는 눈으로 보이지 않습니다. 대쪽진단은 열화상·일반사진 한 쌍을 분석해 그 틈의 위치를 데이터로 보여주고, 현장에서 바로 진단 리포트까지 만들어줍니다.</p>
+
+    <div class="about-steps">
+      <div class="about-step"><div class="an-tile" style="background:#2A9D99">01</div><b>한 쌍 업로드</b><span>열화상과 일반사진을 함께 올려야 침기 후보가 실제로 무엇인지(창틀 · 배관 · 일사) 비교할 수 있습니다.</span></div>
+      <div class="about-step"><div class="an-tile" style="background:#391C57">02</div><b>자동 탐지</b><span>RGB 열도값으로 고온·저온 클러스터를 BFS로 분리하고, 측정 조건(여름·냉방 중 등)에 따라 탐지 기준을 자동으로 전환합니다.</span></div>
+      <div class="about-step"><div class="an-tile" style="background:#DD5B00">03</div><b>진단 리포트</b><span>열취약성 등급(A/B/C) · 확정 침기 개소 · 사진을 한 장의 리포트로 정리해 PNG/PDF로 출력합니다.</span></div>
+    </div>
+
+    <div class="notice">
+      <div class="dot"></div>
+      <span>대구쪽방상담소와 함께하는 주거환경 개선 리빙랩의 일부로 개발되었습니다.</span>
+    </div>
+
+    <div style="margin-top:26px;display:flex;gap:10px">
+      <button class="btn" onclick="go('main')">← 처음으로</button>
+      <button class="btn primary" onclick="go('upload')">사진 업로드 시작 →</button>
+    </div>
+  </section>
+
+  <!-- ① 업로드 -->
+  <section class="screen" id="upload">
+    <div class="eyebrow">1단계 — 입력</div>
+    <h1 style="margin-bottom:6px">사진 업로드</h1>
+    <p class="lead">열화상과 일반사진을 한 쌍으로 올리세요. 두 장이 모두 있어야 의심 구역을 판단할 수 있습니다.</p>
+
+    <div class="drops">
+      <!-- 열화상 -->
+      <div class="drop-zone" id="dzThermal">
+        <input type="file" id="fileThermal" accept="image/*" style="display:none">
+        <div id="phThermal">
+          <div class="drop-ico">🌡️</div>
+          <div class="drop-ttl">열화상 사진</div>
+          <div class="drop-sub">클릭하거나 파일을 끌어다 놓으세요</div>
+          <div class="drop-note">⚠ 카카오톡 전송 시 온도 데이터 손상 — 원본 파일 사용</div>
+        </div>
+        <canvas id="prevThermal" width="400" height="220" style="display:none"></canvas>
+        <span class="drop-badge" id="bdgThermal" style="display:none">열화상</span>
+        <button class="drop-reset" id="rstThermal" style="display:none" title="다시 선택">✕</button>
+      </div>
+      <!-- 일반사진 -->
+      <div class="drop-zone" id="dzNormal">
+        <input type="file" id="fileNormal" accept="image/*" style="display:none">
+        <div id="phNormal">
+          <div class="drop-ico">📷</div>
+          <div class="drop-ttl">일반 사진</div>
+          <div class="drop-sub">클릭하거나 파일을 끌어다 놓으세요</div>
+          <div class="drop-note">같은 구역 · 같은 각도로 촬영한 사진</div>
+        </div>
+        <img id="prevNormal" style="display:none">
+        <span class="drop-badge" id="bdgNormal" style="display:none">일반사진</span>
+        <button class="drop-reset" id="rstNormal" style="display:none" title="다시 선택">✕</button>
+      </div>
+    </div>
+
+    <div class="notice" id="noticeReady" style="display:none">
+      <div class="dot"></div>
+      <span>두 사진 업로드 완료 — <b>분석 시작</b> 버튼을 누르면 고온 구역을 자동으로 찾습니다.</span>
+    </div>
+    <div class="notice warn" id="noticePartial" style="display:none">
+      <div class="dot warn"></div>
+      <span id="noticePartialTxt">열화상 사진을 올려주세요.</span>
+    </div>
+
+    <div class="meta-form">
+      <div class="card-form">
+        <div class="field"><label>세대 / 위치</label><input id="metaUnit" value="대구 쪽방촌 ○○호"></div>
+        <div class="field"><label>촬영 구역</label>
+          <select id="metaZone">
+            <option>창호 주변</option><option>벽-천장 모서리</option>
+            <option>벽-바닥 경계</option><option>출입문 둘레</option><option>화장실</option><option>복도</option>
+          </select>
+        </div>
+        <div class="field" style="display:flex;gap:10px">
+          <div style="flex:1"><label>측정 일시</label><input id="metaDate" type="date"></div>
+          <div style="flex:1"><label>측정 조건</label>
+            <select id="metaCond">
+              <option>여름 · 냉방 없음</option><option>여름 · 냉방 중</option>
+              <option>겨울 · 난방 중</option><option>겨울 · 난방 없음</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>현장 진단자</label><input id="metaInspector" placeholder="이름을 입력하세요 (선택)"></div>
+      </div>
+      <div class="card-form hint-box">
+        <div id="condHint" style="font-size:13px;color:var(--muted)">측정 조건에 따라 <b style="color:var(--txt)">고온부(겨울·난방 등)</b> 또는 <b style="color:var(--txt)">저온부(여름·냉방 중)</b>를 침기 기준으로 분석합니다.</div>
+        <div id="condModePreview" style="margin-top:4px;font-size:12.5px;font-family:var(--mono);color:var(--action)"></div>
+        <button class="btn primary" id="btnStart" onclick="startAnalysis()" disabled="">분석 시작 →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 분석 -->
+  <section class="screen" id="analysis">
+    <div class="eyebrow">2단계 — 분석 · 확정</div>
+    <h1 style="margin-bottom:14px">침기 의심 구역 진단</h1>
+    <div class="work">
+      <div class="viewer">
+        <div class="vtop">
+          <div class="seg" id="viewSeg">
+            <button class="on" data-v="thermal">열화상</button>
+            <button data-v="normal">일반</button>
+            <button data-v="overlay">오버레이</button>
+          </div>
+        </div>
+        <div class="stage" id="stage">
+          <canvas id="cvThermal" width="360" height="270"></canvas>
+          <img id="imgNormal" style="opacity:0;transition:.2s">
+          <!-- 윤곽선 오버레이 SVG -->
+          <svg id="outlineSVG" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible"></svg>
+          <div class="markers-layer" id="markersLayer"></div>
+          <!-- 계측기 HUD: 상태 칩 -->
+          <div class="hud-chip" id="hudChip">
+            <span id="hudMode">HOT</span><span class="sep">|</span><span>TH <b id="hudTh">15%</b></span><span class="sep">|</span><span>N <b id="hudN">0</b></span>
+          </div>
+          <!-- 계측기 HUD: 세로 온도 스케일 -->
+          <div class="hud-scale">
+            <div class="grad"></div>
+            <span class="tick" style="top:-1px">고온</span>
+            <span class="tick" style="bottom:-1px">저온</span>
+          </div>
+          <!-- 분석 중 오버레이 -->
+          <div class="analyzing-overlay" id="analyzingOverlay" style="display:none">
+            <div class="spinner"></div>
+            <div style="font-size:13px;color:rgba(255,255,255,.65)">고온 구역 분석 중...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>검출 제어 <span id="modeBadge" style="display:inline-block;margin-left:6px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;vertical-align:middle"></span></h3>
+        <p class="hint">슬라이더로 민감도를 조절하면 의심 후보가 실시간으로 바뀝니다.</p>
+        <div class="slider-wrap">
+          <label><span id="thLabelTxt">고온 임계 (상위 %)</span> <b id="thVal">15%</b></label>
+          <input type="range" id="thSlider" min="5" max="40" step="1" value="15">
+        </div>
+        <div class="readout">
+          <div><div class="k">검출 후보</div><div class="v" id="cCount">0</div></div>
+          <div><div class="k">확정 침기</div><div class="v ok" id="cConf">0</div></div>
+        </div>
+        <div class="clist" id="clist"></div>
+        <div class="detail-box" id="detailBox" style="display:none"></div>
+        <div class="ftbar"><button class="btn primary" onclick="go(&#39;report&#39;)">리포트 만들기 →</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 리포트 -->
+  <section class="screen" id="report">
+    <div class="eyebrow">3단계 — 출력</div>
+    <h1 style="margin-bottom:14px">진단 리포트</h1>
+    <div class="report-card" id="reportCard"></div>
+    <div class="ftbar" style="margin-top:18px;justify-content:space-between">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost" onclick="go(&#39;analysis&#39;)">← 분석으로</button>
+        <button class="btn" id="btnHist" onclick="saveToHistory()">🗂 히스토리에 저장</button>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" onclick="exportCurrentExcel()">⤓ Excel</button>
+        <button class="btn" onclick="exportCurrentJSON()">⤓ JSON</button>
+        <button class="btn" id="btnImg" onclick="saveImage()">📷 이미지 저장</button>
+        <button class="btn primary" id="btnPdf" onclick="savePDF()">📄 PDF 내보내기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 히스토리 -->
+  <section class="screen" id="history">
+    <div class="eyebrow">진단 기록</div>
+    <h1 style="margin-bottom:6px">히스토리</h1>
+    <p class="lead">이 브라우저에 저장된 진단 기록입니다. 사진은 저장되지 않고 요약 정보만 남습니다 — 같은 세대를 여러 번 측정하거나 여러 세대를 비교할 때 활용하세요.</p>
+    <div class="ftbar" style="justify-content:space-between;margin-bottom:16px">
+      <button class="btn ghost" onclick="go('upload')">← 새 진단 시작</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" onclick="exportHistoryExcel()">⤓ 전체 Excel로 내보내기</button>
+        <button class="btn" onclick="clearHistory()">🗑 전체 삭제</button>
+      </div>
+    </div>
+    <div class="card-form" style="overflow-x:auto">
+      <div id="historyList"></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* =============================================
+   상태
+   ============================================= */
+let thermalDataURL = null;  // 업로드된 열화상 dataURL
+let normalDataURL  = null;  // 업로드된 일반사진 dataURL
+let thermalPixels  = null;  // {r,g,b} 배열 (분석용)
+let tW = 0, tH = 0;        // 열화상 원본 해상도
+let candidates = [];
+let selected = null;
+let threshold = 15; // 상위 %
+let mode = 'hot'; // 'hot' = 고온부 기준(겨울·난방 중 등) / 'cold' = 저온부 기준(여름·냉방 중)
+
+// 측정 조건 문자열 → 분석 기준 모드 결정
+// 스펙: 여름·냉방 중 → 저온 구역이 침기 신호 / 그 외(겨울·난방 중 포함) → 고온 구역이 침기 신호
+function modeFromCond(condText){
+  return (condText && condText.indexOf("냉방 중") !== -1) ? "cold" : "hot";
+}
+
+/* =============================================
+   화면 전환
+   ============================================= */
+const ORDER = ["upload","analysis","report"];
+function go(name){
+  const next = document.getElementById(name);
+  const cur = document.querySelector(".screen.on");
+  if(!next || cur === next) return;
+
+  document.getElementById("steps").style.display = ORDER.includes(name) ? "flex" : "none";
+  document.querySelectorAll(".step").forEach(st => {
+    const i = ORDER.indexOf(st.dataset.s), curI = ORDER.indexOf(name);
+    st.classList.toggle("active", st.dataset.s===name);
+    st.classList.toggle("done", i < curI);
+  });
+
+  const enter = () => {
+    next.classList.add("on");
+    // 리플로우를 강제한 뒤 show를 붙여야 트랜지션이 실제로 재생됨
+    requestAnimationFrame(() => requestAnimationFrame(() => next.classList.add("show")));
+    window.scrollTo({top:0, behavior:"smooth"});
+    if(name === "report") buildReport();
+    if(name === "history") renderHistory();
+  };
+
+  if(cur){
+    cur.classList.remove("show");
+    setTimeout(() => { cur.classList.remove("on"); enter(); }, 190);
+  } else {
+    enter();
+  }
+}
+document.querySelectorAll(".step").forEach(st => st.addEventListener("click", () => go(st.dataset.s)));
+
+/* =============================================
+   날짜 기본값
+   ============================================= */
+document.getElementById("metaDate").value = new Date().toISOString().slice(0,10);
+
+/* =============================================
+   측정 조건 → 분석 모드 실시간 프리뷰
+   ============================================= */
+function updateCondPreview(){
+  const cond = document.getElementById("metaCond").value;
+  const m = modeFromCond(cond);
+  const el = document.getElementById("condModePreview");
+  el.style.color = m === "cold" ? "var(--cold)" : "var(--weak)";
+  el.textContent = m === "cold"
+    ? "→ 현재 조건: 저온부(冷) 기준으로 침기 의심 구역을 탐지합니다."
+    : "→ 현재 조건: 고온부(熱) 기준으로 침기 의심 구역을 탐지합니다.";
+}
+document.getElementById("metaCond").addEventListener("change", updateCondPreview);
+updateCondPreview();
+
+function updatePanelModeUI(){
+  const badge = document.getElementById("modeBadge");
+  const label = document.getElementById("thLabelTxt");
+  const hudMode = document.getElementById("hudMode");
+  if(!badge || !label) return;
+  if(mode === "cold"){
+    badge.textContent = "❄ 저온부 기준";
+    badge.style.background = "rgba(98,174,240,.14)";
+    badge.style.color = "var(--cold)";
+    label.textContent = "저온 임계 (하위 %)";
+    if(hudMode){ hudMode.textContent = "COLD"; hudMode.style.color = "#62AEF0"; }
+  } else {
+    badge.textContent = "🔥 고온부 기준";
+    badge.style.background = "rgba(221,91,0,.12)";
+    badge.style.color = "var(--weak)";
+    label.textContent = "고온 임계 (상위 %)";
+    if(hudMode){ hudMode.textContent = "HOT"; hudMode.style.color = "#FF7A3D"; }
+  }
+  const ht = document.getElementById("hudTh"); if(ht) ht.textContent = threshold+"%";
+}
+
+/* =============================================
+   파일 업로드
+   ============================================= */
+function setupDrop(dzId, fileId, type){
+  const dz   = document.getElementById(dzId);
+  const inp  = document.getElementById(fileId);
+
+  // 클릭 — reset 버튼 클릭은 제외
+  dz.addEventListener("click", e => {
+    if(e.target.classList.contains("drop-reset")) return;
+    inp.click();
+  });
+
+  inp.addEventListener("change", () => {
+    if(inp.files[0]) loadFile(inp.files[0], type);
+  });
+
+  // 드래그&드롭
+  dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("drag-over"); });
+  dz.addEventListener("dragleave", () => dz.classList.remove("drag-over"));
+  dz.addEventListener("drop", e => {
+    e.preventDefault(); dz.classList.remove("drag-over");
+    if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0], type);
+  });
+
+  // reset 버튼
+  document.getElementById("rst"+type.charAt(0).toUpperCase()+type.slice(1))
+    .addEventListener("click", e => { e.stopPropagation(); resetFile(type); });
+}
+
+function loadFile(file, type){
+  if(!file.type.startsWith("image/")){ alert("이미지 파일만 가능합니다."); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    if(type === "thermal") showThermalPreview(e.target.result);
+    else                   showNormalPreview(e.target.result);
+    checkReady();
+  };
+  reader.readAsDataURL(file);
+}
+
+function showThermalPreview(dataURL){
+  thermalDataURL = dataURL;
+  const cv = document.getElementById("prevThermal");
+  const img = new Image();
+  img.onload = () => {
+    tW = img.naturalWidth; tH = img.naturalHeight;
+    const ctx = cv.getContext("2d");
+    cv.width = cv.offsetWidth || 400; cv.height = 220;
+    ctx.drawImage(img, 0, 0, cv.width, cv.height);
+    // 픽셀 추출 (다운스케일된 것으로 분석)
+    const d = ctx.getImageData(0,0,cv.width,cv.height).data;
+    thermalPixels = [];
+    for(let i=0;i<d.length;i+=4) thermalPixels.push({r:d[i],g:d[i+1],b:d[i+2]});
+  };
+  img.src = dataURL;
+  setFilled("Thermal", dataURL);
+}
+
+function showNormalPreview(dataURL){
+  normalDataURL = dataURL;
+  const el = document.getElementById("prevNormal");
+  el.src = dataURL;
+  setFilled("Normal", null);
+}
+
+function setFilled(type, dataURL){
+  const dz  = document.getElementById("dz"+type);
+  const ph  = document.getElementById("ph"+type);
+  const bdg = document.getElementById("bdg"+type);
+  const rst = document.getElementById("rst"+type);
+  const prev = type==="Thermal" ? document.getElementById("prevThermal") : document.getElementById("prevNormal");
+  dz.classList.add("filled");
+  ph.style.display = "none";
+  prev.style.display = "block";
+  bdg.style.display = "block";
+  rst.style.display = "block";
+}
+
+function resetFile(type){
+  const Type = type.charAt(0).toUpperCase()+type.slice(1);
+  if(type==="thermal"){ thermalDataURL=null; thermalPixels=null;
+    const cv=document.getElementById("prevThermal"); cv.getContext("2d").clearRect(0,0,cv.width,cv.height);
+    document.getElementById("fileThermal").value="";
+  } else {
+    normalDataURL=null;
+    document.getElementById("prevNormal").src="";
+    document.getElementById("fileNormal").value="";
+  }
+  const dz=document.getElementById("dz"+Type);
+  dz.classList.remove("filled");
+  document.getElementById("ph"+Type).style.display="";
+  document.getElementById("bdg"+Type).style.display="none";
+  document.getElementById("rst"+Type).style.display="none";
+  checkReady();
+}
+
+function checkReady(){
+  const both = thermalDataURL && normalDataURL;
+  const onlyT = thermalDataURL && !normalDataURL;
+  const onlyN = !thermalDataURL && normalDataURL;
+  document.getElementById("btnStart").disabled = !both;
+  document.getElementById("noticeReady").style.display   = both   ? "flex" : "none";
+  document.getElementById("noticePartial").style.display = (onlyT||onlyN) ? "flex" : "none";
+  if(onlyT) document.getElementById("noticePartialTxt").textContent = "일반사진도 올려주세요.";
+  if(onlyN) document.getElementById("noticePartialTxt").textContent = "열화상 사진을 올려주세요.";
+}
+
+setupDrop("dzThermal","fileThermal","thermal");
+setupDrop("dzNormal","fileNormal","normal");
+
+/* =============================================
+   뷰 토글
+   ============================================= */
+document.querySelectorAll("#viewSeg button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("#viewSeg button").forEach(x => x.classList.toggle("on", x===b));
+  const v = b.dataset.v;
+  const th = document.getElementById("cvThermal");
+  const nm = document.getElementById("imgNormal");
+  if(v==="thermal"){ th.style.opacity=1; nm.style.opacity=0; }
+  else if(v==="normal"){ th.style.opacity=0; nm.style.opacity=1; }
+  else { th.style.opacity=.6; nm.style.opacity=.6; }
+}));
+
+/* =============================================
+   분석 엔진 — RGB → 고온 클러스터 + 정확한 윤곽선
+   ============================================= */
+
+// 캔버스 실제 픽셀 크기 (분석 기준)
+let cvW = 360, cvH = 270;
+
+function analyzeHotRegions(percentile){
+  if(!thermalPixels) return [];
+  const W = cvW, H = cvH;
+
+  // 열도 계산: Fluke 팔레트 기준 빨강(고온) → 파랑(저온)
+  // R↑ B↓ = 고온 / R↓ B↑ = 저온
+  const heat = thermalPixels.map(p => p.r * 2.0 - p.b * 1.8 + p.g * 0.2);
+
+  // 분석 모드에 따라 탐지 방향 결정
+  // hot  = 고온부 탐지 (겨울·난방 중 등 — 침기점이 고온으로 나타남)
+  // cold = 저온부 탐지 (여름·냉방 중 — 냉방 중인 실내 기준 침기점이 저온으로 나타남)
+  const score = mode === "cold" ? heat.map(h => -h) : heat;
+
+  // 상위 percentile% 임계값 (score 기준)
+  const sorted = [...score].sort((a,b)=>b-a);
+  const cutoff = sorted[Math.floor(sorted.length * percentile / 100)] || sorted[0];
+
+  // 의심 픽셀 마스크 (2D 배열)
+  const mask = new Uint8Array(W * H);
+  for(let i=0;i<score.length;i++){
+    if(score[i] >= cutoff) mask[i] = 1;
+  }
+
+  // ── Connected Components (BFS) ──
+  // 서로 연결된 고온 픽셀 덩어리를 개별 구역으로 분리
+  const label = new Int32Array(W * H).fill(-1);
+  let numLabels = 0;
+  const queue = [];
+
+  for(let idx=0; idx<W*H; idx++){
+    if(mask[idx] !== 1 || label[idx] !== -1) continue;
+    // BFS 시작
+    const lbl = numLabels++;
+    queue.length = 0;
+    queue.push(idx);
+    label[idx] = lbl;
+    let qi = 0;
+    while(qi < queue.length){
+      const cur = queue[qi++];
+      const cx2 = cur % W, cy2 = Math.floor(cur / W);
+      // 4방향 이웃
+      const nbrs = [];
+      if(cx2 > 0)   nbrs.push(cur-1);
+      if(cx2 < W-1) nbrs.push(cur+1);
+      if(cy2 > 0)   nbrs.push(cur-W);
+      if(cy2 < H-1) nbrs.push(cur+W);
+      for(const n of nbrs){
+        if(mask[n]===1 && label[n]===-1){ label[n]=lbl; queue.push(n); }
+      }
+    }
+  }
+
+  // ── 각 컴포넌트 통계 수집 ──
+  const comps = {};
+  for(let i=0;i<W*H;i++){
+    const lbl = label[i]; if(lbl===-1) continue;
+    if(!comps[lbl]) comps[lbl]={xs:[],ys:[],hs:[]};
+    comps[lbl].xs.push(i%W);
+    comps[lbl].ys.push(Math.floor(i/W));
+    comps[lbl].hs.push(score[i]);
+  }
+
+  // 작은 노이즈 제거 (픽셀 수 20 미만)
+  const large = Object.values(comps).filter(c=>c.xs.length>=20);
+
+  // 너무 많으면 크기 상위 4개만
+  large.sort((a,b)=>b.xs.length-a.xs.length);
+  const top = large.slice(0,4);
+
+  const heatMin = Math.min(...score), heatMax = Math.max(...score);
+  const heatRange = heatMax - heatMin || 1;
+
+  return top.map((cl, i) => {
+    // ── 정확한 무게중심 (모든 픽셀 평균) ──
+    const cx = cl.xs.reduce((a,b)=>a+b,0) / cl.xs.length;
+    const cy = cl.ys.reduce((a,b)=>a+b,0) / cl.ys.length;
+    const maxH = Math.max(...cl.hs);
+    const relHeat = (maxH - heatMin) / heatRange;
+    const pct = (relHeat * 100).toFixed(0);
+    const area = cl.xs.length;
+
+    // ── 바운딩 박스 (윤곽선 표시용) ──
+    const minX = Math.min(...cl.xs), maxX = Math.max(...cl.xs);
+    const minY = Math.min(...cl.ys), maxY = Math.max(...cl.ys);
+
+    // ── 윤곽선 경계 픽셀 추출 (내부 픽셀 중 이웃에 비고온 있는 것) ──
+    // 성능을 위해 바운딩박스 기준 샘플링
+    const boundary = [];
+    for(let pi=0; pi<cl.xs.length; pi+=2){
+      const px=cl.xs[pi], py=cl.ys[pi];
+      const idx2 = py*W+px;
+      const isBoundary =
+        (px===0||label[idx2-1]!==label[idx2]) ||
+        (px===W-1||label[idx2+1]!==label[idx2]) ||
+        (py===0||label[idx2-W]!==label[idx2]) ||
+        (py===H-1||label[idx2+W]!==label[idx2]);
+      if(isBoundary) boundary.push({x:px,y:py});
+    }
+
+    // 위치 이름
+    const xPct2 = cx/W, yPct2 = cy/H;
+    let pos = yPct2<0.25?"상단":yPct2>0.75?"하단":"중앙";
+    if(xPct2<0.3) pos="좌측 "+pos;
+    else if(xPct2>0.7) pos="우측 "+pos;
+    else pos="중앙 "+pos;
+
+    // 형태
+    const xSpread=maxX-minX, ySpread=maxY-minY;
+    const ratio=xSpread/(ySpread||1);
+    let shape = ratio>3?"수평 선형":ratio<0.33?"수직 선형":area>800?"넓은 면":"점/소면";
+
+    return {
+      id: i+1,
+      // 마커 위치: 실제 무게중심을 % 단위로
+      x: (cx/W*100).toFixed(2),
+      y: (cy/H*100).toFixed(2),
+      // 바운딩박스 (% 단위)
+      bbox: {
+        x: (minX/W*100).toFixed(2),
+        y: (minY/H*100).toFixed(2),
+        w: ((maxX-minX)/W*100).toFixed(2),
+        h: ((maxY-minY)/H*100).toFixed(2),
+      },
+      // 경계 픽셀 (% 단위, 윤곽선용)
+      boundary: boundary.map(p=>({x:(p.x/W*100).toFixed(1), y:(p.y/H*100).toFixed(1)})),
+      relHeat, pct, area, pos, shape,
+      name: pos+(mode==="cold"?" 저온부":" 고온부"),
+      auto: relHeat>0.75?"침기 강하게 의심":relHeat>0.45?"침기 의심":(mode==="cold"?"약한 저온":"약한 고온"),
+      status: null,
+    };
+  }).sort((a,b)=>b.relHeat-a.relHeat);
+}
+
+/* ── 윤곽선 SVG 렌더 ── */
+function renderOutlines(cands, selectedId){
+  const svg = document.getElementById("outlineSVG");
+  svg.innerHTML = "";
+
+  cands.forEach(c => {
+    const isSelected = c.id === selectedId;
+    const color = c.status==="침기" ? "#3DDC66"
+                : (c.status && c.status!=="침기") ? "#A39E98"
+                : mode==="cold"
+                  ? (c.relHeat>0.6 ? "#62AEF0" : "#A8D4F8")
+                  : (c.relHeat>0.6 ? "#FF7A3D" : "#FFB23D");
+    const opacity = (c.status && c.status!=="침기") ? 0.3 : isSelected ? 1.0 : 0.7;
+    const strokeW = isSelected ? 2.5 : 1.8;
+
+    // 바운딩 박스 rect
+    const bb = c.bbox;
+    const rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    rect.setAttribute("x", bb.x+"%");
+    rect.setAttribute("y", bb.y+"%");
+    rect.setAttribute("width", bb.w+"%");
+    rect.setAttribute("height", bb.h+"%");
+    rect.setAttribute("fill", color);
+    rect.setAttribute("fill-opacity", isSelected ? 0.18 : 0.10);
+    rect.setAttribute("stroke", color);
+    rect.setAttribute("stroke-width", strokeW);
+    rect.setAttribute("stroke-opacity", opacity);
+    rect.setAttribute("rx", "3");
+    rect.style.cursor = "pointer";
+    rect.addEventListener("click", ()=>selectCandidate(c.id));
+    svg.appendChild(rect);
+
+    // 번호 라벨 (바운딩박스 좌상단에)
+    const lx = parseFloat(bb.x), ly = parseFloat(bb.y);
+    const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+    g.style.cursor="pointer";
+    g.addEventListener("click",()=>selectCandidate(c.id));
+
+    const bg = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    bg.setAttribute("x", lx+"%");
+    bg.setAttribute("y", (ly-4)+"%");
+    bg.setAttribute("width","5%");
+    bg.setAttribute("height","5%");
+    bg.setAttribute("rx","2");
+    bg.setAttribute("fill", color);
+    bg.setAttribute("fill-opacity","0.9");
+    g.appendChild(bg);
+
+    const txt = document.createElementNS("http://www.w3.org/2000/svg","text");
+    txt.setAttribute("x", (lx+2.5)+"%");
+    txt.setAttribute("y", (ly-0.5)+"%");
+    txt.setAttribute("text-anchor","middle");
+    txt.setAttribute("dominant-baseline","middle");
+    txt.setAttribute("fill","white");
+    txt.setAttribute("font-size","11");
+    txt.setAttribute("font-weight","700");
+    txt.setAttribute("font-family","monospace");
+    txt.textContent = "#"+c.id;
+    g.appendChild(txt);
+    svg.appendChild(g);
+  });
+}
+
+/* =============================================
+   분석 시작
+   ============================================= */
+function startAnalysis(){
+  if(!thermalDataURL||!normalDataURL){ alert("두 사진을 모두 올려주세요."); return; }
+
+  // 측정 조건 → 분석 모드(고온부/저온부) 확정
+  mode = modeFromCond(document.getElementById("metaCond").value);
+  updatePanelModeUI();
+
+  // 분석 화면으로 이동 (먼저)
+  go("analysis");
+
+  // 오버레이 표시
+  document.getElementById("analyzingOverlay").style.display="flex";
+
+  // 열화상 캔버스에 그리기
+  const cv = document.getElementById("cvThermal");
+  const tImg = new Image();
+  tImg.onload = () => {
+    const ctx = cv.getContext("2d");
+    ctx.drawImage(tImg, 0, 0, cv.width, cv.height);
+    cvW = cv.width; cvH = cv.height; // 전역 저장
+
+    // 픽셀 다시 추출 (분석 캔버스 기준)
+    const d = ctx.getImageData(0,0,cv.width,cv.height).data;
+    thermalPixels = [];
+    for(let i=0;i<d.length;i+=4) thermalPixels.push({r:d[i],g:d[i+1],b:d[i+2]});
+
+    // 일반사진
+    document.getElementById("imgNormal").src = normalDataURL;
+
+    // 약간 딜레이 후 분석 (UI 렌더 대기)
+    setTimeout(() => {
+      candidates = analyzeHotRegions(threshold);
+      selected = null;
+      renderCandidates();
+      document.getElementById("analyzingOverlay").style.display="none";
+    }, 600);
+  };
+  tImg.src = thermalDataURL;
+
+  // 슬라이더 이벤트
+  const sl = document.getElementById("thSlider");
+  sl.oninput = () => {
+    threshold = +sl.value;
+    document.getElementById("thVal").textContent = threshold+"%";
+    const ht = document.getElementById("hudTh"); if(ht) ht.textContent = threshold+"%";
+    candidates = analyzeHotRegions(threshold);
+    selected = null;
+    document.getElementById("detailBox").style.display="none";
+    renderCandidates();
+  };
+}
+
+/* =============================================
+   후보 렌더
+   ============================================= */
+function renderCandidates(){
+  const ml = document.getElementById("markersLayer");
+  const cl = document.getElementById("clist");
+  ml.innerHTML=""; cl.innerHTML="";
+  let conf=0;
+  // 윤곽선 렌더
+  renderOutlines(candidates, selected);
+
+  if(candidates.length===0){
+    cl.innerHTML=`<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">슬라이더를 낮추면 더 많은 후보가 나타납니다.</div>`;
+    document.getElementById("cCount").textContent="0";
+    document.getElementById("cConf").textContent="0";
+    const hn = document.getElementById("hudN"); if(hn) hn.textContent="0";
+    return;
+  }
+
+  candidates.forEach(c => {
+    if(c.status==="침기") conf++;
+    // 마커 — 십자선 스팟 리티클 + 오프셋 태그
+    const m = document.createElement("div");
+    m.className = `mk ${c.relHeat>0.6?"strong":""}${c.status==="침기"?" confirmed":""}${(c.status&&c.status!=="침기")?" dismissed":""}${selected===c.id?" sel":""}`;
+    m.style.left = c.x+"%"; m.style.top = c.y+"%";
+    if(mode==="cold" && !c.status) m.style.setProperty("--mk-color", "#62AEF0");
+    m.innerHTML = `<div class="ring"></div><div class="tag">#${c.id}</div>`;
+    m.onclick = () => selectCandidate(c.id);
+    ml.appendChild(m);
+
+    // 리스트
+    const statusPill = c.status
+      ? `<span class="pill ${c.status==="침기"?"ok":"no"}">${c.status==="침기"?"확정: 침기":"제외: "+c.status}</span>`
+      : `<span class="pill ${c.relHeat>0.6?"s":"w"}">${c.relHeat>0.6?"강 의심":"약 의심"}</span>`;
+    const row = document.createElement("div");
+    row.className="cand"+(selected===c.id?" sel":"");
+    row.innerHTML=`<div class="cand-top"><span class="cand-nm">#${c.id} ${c.name}</span>${statusPill}</div>
+      <div class="cand-sub">${c.shape} · ${mode==="cold"?"냉도":"열도"} ${c.pct}%</div>`;
+    row.onclick = () => selectCandidate(c.id);
+    cl.appendChild(row);
+  });
+
+  document.getElementById("cCount").textContent = candidates.length;
+  document.getElementById("cConf").textContent = conf;
+  const hn = document.getElementById("hudN"); if(hn) hn.textContent = candidates.length;
+}
+
+function selectCandidate(id){
+  selected = id;
+  const c = candidates.find(x=>x.id===id);
+  const db = document.getElementById("detailBox");
+  db.style.display="block";
+  db.innerHTML=`
+    <h3 style="margin-bottom:8px">#${c.id} ${c.name}</h3>
+    <div class="detail-rows">
+      <div><span>위치</span><span>${c.pos}</span></div>
+      <div><span>형태</span><span>${c.shape}</span></div>
+      <div><span>${mode==="cold"?"냉도":"열도"} (상대값)</span><span>${c.pct}%</span></div>
+      <div><span>자동 판정</span><span>${c.auto}</span></div>
+    </div>
+    <div style="color:var(--muted);font-size:12px;margin-top:10px">일반사진과 비교해 이 구역이 무엇인지 확정하세요.</div>
+    <div class="verdict">
+      <button class="yes" onclick="confirm_c(${c.id},'침기')">침기 맞음</button>
+      <button onclick="confirm_c(${c.id},'배관')">배관</button>
+      <button onclick="confirm_c(${c.id},'${mode==="cold"?"디퓨저":"햇빛"}')">${mode==="cold"?"냉방 디퓨저":"햇빛(일사)"}</button>
+      <button onclick="confirm_c(${c.id},'기타')">기타</button>
+    </div>`;
+  renderCandidates();
+}
+
+function confirm_c(id, verdict){
+  candidates.find(c=>c.id===id).status = verdict;
+  renderCandidates();
+}
+
+/* =============================================
+   리포트 생성
+   ============================================= */
+/* =============================================
+   리포트용 오버레이 합성 이미지
+   — 분석 캔버스 위에 윤곽선/마커를 직접 그려 PNG로 합성
+   (html2canvas 없이도, 분석화면이 숨겨진 상태에서도 항상 동작)
+   ============================================= */
+function buildOverlayImage(){
+  const cvSrc = document.getElementById("cvThermal");
+  if(!cvSrc || !cvW || !cvH) return null;
+  const S = 2; // 인쇄 품질을 위해 2배 확대
+  const oc = document.createElement("canvas");
+  oc.width = cvW*S; oc.height = cvH*S;
+  const x = oc.getContext("2d");
+  x.drawImage(cvSrc, 0, 0, oc.width, oc.height);
+
+  candidates.forEach(c => {
+    const color = c.status==="침기" ? "#3DDC66"
+                : (c.status && c.status!=="침기") ? "#A39E98"
+                : mode==="cold"
+                  ? (c.relHeat>0.6 ? "#62AEF0" : "#A8D4F8")
+                  : (c.relHeat>0.6 ? "#FF7A3D" : "#FFB23D");
+    const bx=parseFloat(c.bbox.x)/100*oc.width, by=parseFloat(c.bbox.y)/100*oc.height;
+    const bw=parseFloat(c.bbox.w)/100*oc.width, bh=parseFloat(c.bbox.h)/100*oc.height;
+    x.strokeStyle=color; x.lineWidth=2.5;
+    x.strokeRect(bx,by,bw,bh);
+    // 번호 라벨
+    x.fillStyle=color; x.fillRect(bx, by-16, 26, 16);
+    x.fillStyle="#fff"; x.font="11px monospace"; x.textBaseline="middle"; x.textAlign="center";
+    x.fillText("#"+c.id, bx+13, by-8);
+    // 중심 십자선 마커
+    const cx=parseFloat(c.x)/100*oc.width, cy=parseFloat(c.y)/100*oc.height;
+    x.beginPath(); x.arc(cx,cy,6,0,Math.PI*2); x.strokeStyle=color; x.lineWidth=1.5; x.stroke();
+    x.beginPath(); x.arc(cx,cy,2,0,Math.PI*2); x.fillStyle=color; x.fill();
+  });
+  return oc.toDataURL("image/png");
+}
+
+/* =============================================
+   진단 시사점 · 해결 방안 생성
+   — AI가 사진을 다시 해석하는 게 아니라, 이미 추출된
+   형태(shape)·위치(pos)·등급 데이터를 건축 진단 규칙에 매핑
+   ============================================= */
+function shapeInsight(c){
+  const map = {
+    "수평 선형": {
+      cause: "창틀 상·하단 프레임이나 걸레받이 경계의 틈새로 보입니다.",
+      fix: "실리콘 코킹 또는 단열테이프로 틈을 메우세요. 틈이 넓다면 우레탄폼 충전도 함께 검토하세요."
+    },
+    "수직 선형": {
+      cause: "창틀 좌·우 프레임이나 문틀 경계의 틈새로 보입니다.",
+      fix: "코킹과 우레탄폼으로 틈새를 채우는 보강을 권장합니다."
+    },
+    "넓은 면": {
+      cause: "국소 틈새가 아니라 벽체 자체의 단열 성능 저하가 의심됩니다.",
+      fix: "단열필름·에어캡(뽁뽁이) 등으로 우선 임시 보강하고, 장기적으로 내단열 보강 시공을 검토하세요."
+    },
+    "점/소면": {
+      cause: "콘센트·배관 관통부나 작은 균열 같은 국소 틈새로 보입니다.",
+      fix: "해당 지점만 우레탄폼이나 코킹으로 충전하면 효과적으로 개선됩니다."
+    }
+  };
+  const base = map[c.shape] || {cause:"틈새 유형을 특정하기 어려운 구역입니다.", fix:"일반사진과 대조해 원인을 직접 확인한 뒤 보강 방법을 정하세요."};
+  let extra = "";
+  if(c.pos && c.pos.indexOf("하단") !== -1) extra = " 바닥과 인접해 한기가 직접 유입될 수 있는 구간이라 우선 조치가 필요합니다.";
+  return {cause: base.cause + extra, fix: base.fix};
+}
+
+function gradeInsight(grade, confCount, maxHeat, modeNow){
+  const unit = modeNow==="cold" ? "냉도" : "열도";
+  if(grade==="A") return "확정된 침기 구역이 거의 없어 현재 단열·기밀 성능은 양호한 편입니다. 정기적인 재측정으로 모니터링하는 것을 권장합니다.";
+  if(grade==="B") return `${confCount}개 구역에서 침기가 의심되나 강도는 중간 수준(최대 ${unit} ${maxHeat}%)입니다. 코킹·단열테이프 등 간단한 보강으로 개선 가능한 수준입니다.`;
+  return `${confCount}개 구역에서 침기가 확인되었고 강도(최대 ${unit} ${maxHeat}%)도 높은 편입니다. 에너지 손실과 동절기 한랭 노출 위험이 커서, 전문 시공업체를 통한 정밀 점검과 보강공사를 우선적으로 권장합니다.`;
+}
+
+function computeGrade(){
+  const conf = candidates.filter(c=>c.status==="침기");
+  const maxHeat = conf.length ? Math.max(...conf.map(c=>+c.pct)) : 0;
+  let grade="A",label="양호",cls="grade-A";
+  if(conf.length>=1 && maxHeat<60){grade="B";label="주의";cls="grade-B";}
+  if(maxHeat>=60 || conf.length>=3){grade="C";label="취약";cls="grade-C";}
+  return {conf, maxHeat, grade, label, cls};
+}
+
+function buildReport(){
+  const {conf, maxHeat, grade, label, cls} = computeGrade();
+
+  const unit = document.getElementById("metaUnit").value;
+  const zone = document.getElementById("metaZone").value;
+  const date = document.getElementById("metaDate").value;
+  const cond = document.getElementById("metaCond").value;
+  const inspector = document.getElementById("metaInspector").value.trim();
+
+  const findings = conf.length
+    ? `<table class="ftable">
+        <thead><tr><th>NO</th><th>위치 · 형태</th><th>${mode==="cold"?"냉도":"열도"}</th><th>판정</th></tr></thead>
+        <tbody>${conf.map(c=>`<tr>
+          <td class="mono">#${c.id}</td>
+          <td><div class="nm">${c.name}</div><div class="sub">${c.shape}</div></td>
+          <td class="mono num" style="color:var(--hot)">${c.pct}%</td>
+          <td><span class="pill ok">침기 확정</span></td>
+        </tr>`).join("")}</tbody>
+      </table>`
+    : `<div class="empty-msg">확정된 침기 지점이 없습니다.<br>분석 화면에서 후보를 확정해 주세요.</div>`;
+
+  const overlayImg = buildOverlayImage();
+  const photos = `<div class="rphotos">
+      <figure><img src="${thermalDataURL||''}" alt="열화상"><figcaption>열화상</figcaption></figure>
+      <figure><img src="${normalDataURL||''}" alt="일반사진"><figcaption>일반사진</figcaption></figure>
+      <figure><img src="${overlayImg||''}" alt="분석 오버레이"><figcaption>분석 오버레이</figcaption></figure>
+    </div>`;
+
+  const insightSummary = gradeInsight(grade, conf.length, maxHeat, mode);
+  const insightList = conf.length
+    ? conf.map(c => {
+        const ins = shapeInsight(c);
+        return `<div class="rinsight-item">
+          <span class="ri-no">#${c.id}</span>
+          <div><b>${c.name} · ${c.shape}</b><span>${ins.cause} ${ins.fix}</span></div>
+        </div>`;
+      }).join("")
+    : "";
+  const insight = `<div class="rinsight">
+      <div class="rinsight-head">종합 시사점 · 해결 방안</div>
+      <p class="rinsight-summary">${insightSummary}</p>
+      ${insightList ? `<div class="rinsight-list">${insightList}</div>` : ""}
+      <p class="rinsight-note">※ 형태·위치 패턴에 기반한 일반적 추정입니다. 실제 시공 전 현장 확인을 권장합니다.</p>
+    </div>`;
+
+  document.getElementById("reportCard").innerHTML=`
+    <div class="rhead">
+      <div>
+        <div class="eyebrow">세대 진단 결과</div>
+        <h2 style="margin-top:6px">${unit}</h2>
+        <div style="color:var(--muted);font-size:13px;margin-top:3px;font-family:var(--mono)">${zone} · ${date} · ${cond} · 분석기준: ${mode==="cold"?"저온부":"고온부"}</div>
+      </div>
+      <div style="text-align:center">
+        <div class="grade-badge ${cls}">${grade}</div>
+        <div style="color:var(--muted);font-size:12px;margin-top:6px">열취약성 ${label}</div>
+      </div>
+    </div>
+    <div class="rbody">
+      ${photos}
+      <div class="rstats">
+        <div><div class="v">${conf.length}</div><div class="k">확정 침기 개소</div></div>
+        <div><div class="v" style="color:var(--hot)">${maxHeat}%</div><div class="k">최대 ${mode==="cold"?"냉도":"열도"}</div></div>
+        <div><div class="v">${candidates.length}</div><div class="k">총 검출 후보</div></div>
+      </div>
+      ${findings}
+      ${insight}
+      <div class="rfoot">
+        <div>대쪽진단 v8 · RGB 기반 ${mode==="cold"?"저온":"고온"} 클러스터 자동 검출</div>
+        <div class="sig">현장 진단자 ${inspector ? `<b style="color:var(--txt);font-family:var(--sans);font-weight:600">${inspector}</b>` : "___________________"}</div>
+      </div>
+    </div>`;
+}
+
+/* =============================================
+   데이터 활용 — CSV/JSON 내보내기 · 로컬 히스토리
+   ============================================= */
+function escHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+function safeFileName(s){
+  return String(s ?? "diagnosis").replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, "_");
+}
+function downloadXLSX(rows, filename, sheetName){
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = rows[0].map((_, ci) => {
+    const maxLen = rows.reduce((m, r) => Math.max(m, String(r[ci] ?? "").length), 0);
+    return { wch: Math.min(Math.max(maxLen + 2, 8), 40) };
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName || "Sheet1");
+  XLSX.writeFile(wb, filename);
+}
+function downloadBlob(content, filename, mime){
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function currentMeta(){
+  return {
+    unit: document.getElementById("metaUnit").value,
+    zone: document.getElementById("metaZone").value,
+    date: document.getElementById("metaDate").value,
+    cond: document.getElementById("metaCond").value,
+    inspector: document.getElementById("metaInspector").value.trim(),
+  };
+}
+
+// ── 현재 진단 결과 Excel (후보별 1행) ──
+function exportCurrentExcel(){
+  const m = currentMeta();
+  const rows = [["세대","구역","측정일시","측정조건","분석기준","번호","위치","형태","강도(%)","판정","진단자"]];
+  candidates.forEach(c => {
+    rows.push([m.unit, m.zone, m.date, m.cond, mode==="cold"?"저온부":"고온부", c.id, c.pos, c.shape, +c.pct, c.status||"미확정", m.inspector]);
+  });
+  downloadXLSX(rows, `대쪽진단_${safeFileName(m.unit)}_${m.date}.xlsx`, "진단결과");
+}
+
+// ── 현재 진단 결과 JSON (전체 후보 상세 데이터) ──
+function exportCurrentJSON(){
+  const m = currentMeta();
+  const data = {
+    ...m,
+    analysisMode: mode==="cold"?"저온부":"고온부",
+    threshold,
+    candidates: candidates.map(c => ({
+      id:c.id, pos:c.pos, shape:c.shape, pct:c.pct, relHeat:c.relHeat, area:c.area,
+      x:c.x, y:c.y, bbox:c.bbox, status:c.status||null
+    })),
+    exportedAt: new Date().toISOString()
+  };
+  downloadBlob(JSON.stringify(data, null, 2), `대쪽진단_${safeFileName(m.unit)}_${m.date}.json`, "application/json;charset=utf-8");
+}
+
+// ── 히스토리 (요약 정보만, 사진 제외 — localStorage) ──
+const HISTORY_KEY = "daejjok_history_v1";
+
+function loadHistory(){
+  try{ return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); }
+  catch(e){ return []; }
+}
+function saveToHistory(){
+  const m = currentMeta();
+  const {conf, maxHeat, grade} = computeGrade();
+  const rec = {
+    savedAt: new Date().toISOString(),
+    ...m,
+    mode, grade,
+    confirmedCount: conf.length,
+    totalCandidates: candidates.length,
+    maxHeat,
+  };
+  const list = loadHistory();
+  list.unshift(rec);
+  try{
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+    const btn = document.getElementById("btnHist");
+    const old = btn.textContent;
+    btn.textContent = "✅ 저장됨";
+    setTimeout(()=>{ btn.textContent = old; }, 1500);
+  }catch(e){
+    alert("브라우저 저장공간이 부족해 히스토리를 저장하지 못했습니다.");
+  }
+}
+function deleteHistoryRecord(idx){
+  const list = loadHistory();
+  list.splice(idx, 1);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+  renderHistory();
+}
+function clearHistory(){
+  if(!confirm("저장된 진단 기록을 모두 삭제할까요? 되돌릴 수 없습니다.")) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+}
+function exportHistoryExcel(){
+  const list = loadHistory();
+  if(!list.length){ alert("내보낼 히스토리가 없습니다."); return; }
+  const rows = [["저장일시","세대","구역","측정일시","측정조건","분석기준","등급","확정 개소","총 후보","최대 강도(%)","진단자"]];
+  list.forEach(r => rows.push([
+    r.savedAt, r.unit, r.zone, r.date, r.cond, r.mode==="cold"?"저온부":"고온부",
+    r.grade, +r.confirmedCount, +r.totalCandidates, +r.maxHeat, r.inspector
+  ]));
+  downloadXLSX(rows, `대쪽진단_히스토리_${new Date().toISOString().slice(0,10)}.xlsx`, "히스토리");
+}
+function renderHistory(){
+  const list = loadHistory();
+  const wrap = document.getElementById("historyList");
+  if(!wrap) return;
+  if(!list.length){
+    wrap.innerHTML = `<div class="empty-msg">아직 저장된 진단 기록이 없습니다.<br>리포트 화면에서 "🗂 히스토리에 저장"을 눌러보세요.</div>`;
+    return;
+  }
+  const gradePill = g => g==="A" ? `<span class="pill ok">A</span>` : g==="B" ? `<span class="pill w">B</span>` : `<span class="pill s">C</span>`;
+  wrap.innerHTML = `<table class="ftable">
+    <thead><tr><th>날짜</th><th>세대 · 구역</th><th>기준</th><th>등급</th><th>확정/후보</th><th>최대강도</th><th>진단자</th><th></th></tr></thead>
+    <tbody>${list.map((r,i)=>`<tr>
+      <td class="mono">${escHtml(r.date)||"-"}</td>
+      <td><div class="nm">${escHtml(r.unit)}</div><div class="sub">${escHtml(r.zone)}</div></td>
+      <td class="mono">${r.mode==="cold"?"저온부":"고온부"}</td>
+      <td>${gradePill(r.grade)}</td>
+      <td class="mono">${r.confirmedCount}/${r.totalCandidates}</td>
+      <td class="mono num">${r.maxHeat}%</td>
+      <td>${escHtml(r.inspector)||"-"}</td>
+      <td><button class="btn ghost" style="padding:4px 8px;font-size:12px" onclick="deleteHistoryRecord(${i})">삭제</button></td>
+    </tr>`).join("")}</tbody>
+  </table>`;
+}
+
+/* =============================================
+   이미지 저장
+   ============================================= */
+async function saveImage(){
+  const btn=document.getElementById("btnImg");
+  btn.textContent="⏳ 캡처 중..."; btn.disabled=true;
+  try{
+    const canvas=await html2canvas(document.getElementById("reportCard"),{backgroundColor:"#FFFFFF",scale:2});
+    const a=document.createElement("a");
+    a.download=`대쪽진단_${new Date().toISOString().slice(0,10)}.png`;
+    a.href=canvas.toDataURL("image/png"); a.click();
+    btn.textContent="✅ 저장 완료";
+    setTimeout(()=>{btn.textContent="📷 이미지 저장";btn.disabled=false;},2000);
+  }catch(e){alert("저장 실패: "+e.message);btn.textContent="📷 이미지 저장";btn.disabled=false;}
+}
+
+/* =============================================
+   PDF 저장
+   ============================================= */
+async function savePDF(){
+  const btn=document.getElementById("btnPdf");
+  btn.textContent="⏳ PDF 생성 중..."; btn.disabled=true;
+  try{
+    const {jsPDF}=window.jspdf;
+    const canvas=await html2canvas(document.getElementById("reportCard"),{backgroundColor:"#FFFFFF",scale:2});
+    const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+    const pw=pdf.internal.pageSize.getWidth(), ph=pdf.internal.pageSize.getHeight();
+    const m=12, iw=pw-m*2, ih=(canvas.height/canvas.width)*iw;
+    pdf.setFillColor(255,255,255); pdf.rect(0,0,pw,ph,"F");
+    pdf.setFontSize(8); pdf.setTextColor(97,93,89);
+    pdf.text("대쪽진단 — 주거 침기 열화상 진단", m, 8);
+    pdf.text(new Date().toLocaleDateString("ko-KR"), pw-m, 8, {align:"right"});
+    pdf.setDrawColor(230,230,230); pdf.line(m,10,pw-m,10);
+    pdf.addImage(canvas.toDataURL("image/png"),"PNG",m,14,iw,Math.min(ih,ph-26));
+    pdf.setFontSize(8); pdf.setTextColor(97,93,89);
+    pdf.text("1 / 1", pw/2, ph-5, {align:"center"});
+    pdf.save(`대쪽진단_${new Date().toISOString().slice(0,10)}.pdf`);
+    btn.textContent="✅ PDF 저장 완료";
+    setTimeout(()=>{btn.textContent="📄 PDF 내보내기";btn.disabled=false;},2500);
+  }catch(e){alert("PDF 실패: "+e.message);btn.textContent="📄 PDF 내보내기";btn.disabled=false;}
+}
+</script>
+
+
+</body></html>
